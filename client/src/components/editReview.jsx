@@ -1,40 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../axios/axiosConfig';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography } from '@mui/material';
+import { Container, Typography, TextField, Button, Box } from '@mui/material';
 
 const EditReview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [review, setReview] = useState({
     bookTitle: '',
     author: '',
     rating: '',
-    reviewText: '',
+    reviewText: ''
   });
 
   useEffect(() => {
+    const fetchReview = async () => {
+      try {
+        const { data } = await axios.get(`/reviews/${id}`);
+        setReview(data);
+      } catch (err) {
+        console.error('Error fetching review:', err);
+      }
+    };
     fetchReview();
-  }, []);
-
-  const fetchReview = async () => {
-    try {
-      const response = await axios.get(`/reviews/${id}`);
-      setFormData(response.data);
-    } catch (err) {
-      console.error('Error fetching review:', err);
-    }
-  };
+  }, [id]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setReview(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/reviews/${id}`, formData);
-      alert('Review updated successfully!');
+      await axios.put(`/reviews/${id}`, review);
       navigate('/');
     } catch (err) {
       console.error('Error updating review:', err);
@@ -42,51 +41,49 @@ const EditReview = () => {
   };
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Edit Review
-      </Typography>
+    <Container maxWidth="sm">
+      <Typography variant="h4" sx={{ mt: 4, mb: 2, color: '#db0043' }}>Edit Review</Typography>
       <form onSubmit={handleSubmit}>
         <TextField
+          fullWidth
           label="Book Title"
+          variant="outlined"
           name="bookTitle"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.bookTitle}
+          value={review.bookTitle}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
         <TextField
+          fullWidth
           label="Author"
+          variant="outlined"
           name="author"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.author}
+          value={review.author}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
         <TextField
+          fullWidth
           label="Rating (1-5)"
-          name="rating"
-          variant="outlined"
           type="number"
-          fullWidth
-          margin="normal"
-          value={formData.rating}
+          variant="outlined"
+          name="rating"
+          value={review.rating}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
         <TextField
+          fullWidth
           label="Review"
-          name="reviewText"
           variant="outlined"
+          name="reviewText"
           multiline
           rows={4}
-          fullWidth
-          margin="normal"
-          value={formData.reviewText}
+          value={review.reviewText}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
-        <Button type="submit" variant="contained" color="primary">
+        <Button type="submit" variant="contained" sx={{ backgroundColor: '#ff8000', "&:hover": { backgroundColor: '#ff5500' } }}>
           Update Review
         </Button>
       </form>
