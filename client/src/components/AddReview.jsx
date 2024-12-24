@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from '../axios/axios';
+import axios from '../axios/axiosConfig';
 import { TextField, Button, Container, Typography } from '@mui/material';
 
 const AddReview = () => {
