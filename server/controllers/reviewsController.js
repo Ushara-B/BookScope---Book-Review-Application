@@ -6,6 +6,7 @@ const getAllReviews = async (req, res) => {
     const reviews = await Review.find();
     res.json(reviews);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Error fetching reviews', error: err });
   }
 };
@@ -14,9 +15,10 @@ const getAllReviews = async (req, res) => {
 const createReview = async (req, res) => {
   try {
     const newReview = new Review(req.body);
-    await newReview.save();
-    res.status(201).json(newReview);
+    const savedReview = await newReview.save();
+    res.status(201).json(savedReview);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ message: 'Error creating review', error: err });
   }
 };
@@ -24,12 +26,17 @@ const createReview = async (req, res) => {
 // Update an existing review
 const updateReview = async (req, res) => {
   try {
-    const updatedReview = await Review.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedReview = await Review.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     if (!updatedReview) {
       return res.status(404).json({ message: 'Review not found' });
     }
     res.json(updatedReview);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ message: 'Error updating review', error: err });
   }
 };
@@ -43,6 +50,7 @@ const deleteReview = async (req, res) => {
     }
     res.status(204).send();
   } catch (err) {
+    console.error(err);
     res.status(400).json({ message: 'Error deleting review', error: err });
   }
 };

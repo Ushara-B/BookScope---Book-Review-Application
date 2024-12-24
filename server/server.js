@@ -11,30 +11,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Log all requests (Optional)
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
+// Root Route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Book Review API!');
 });
 
 // Load environment variables
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
-// Health check route
-app.get('/', (req, res) => {
-  res.send('Server is up and running!');
-});
-
 // Connect to MongoDB
 mongoose.connect(MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => {
     console.error('MongoDB connection error:', err);
-    process.exit(1); // Exit process if connection fails
+    process.exit(1);
   });
 
-// Routes
+// Mount reviews route
 app.use('/reviews', reviewsRoute);
 
 // Handle undefined routes
