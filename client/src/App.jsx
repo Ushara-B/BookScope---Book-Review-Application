@@ -1,10 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from "./components/Home";
-import AddReview from "./components/AddReview";
-import EditReview from "./components/editReview.jsx";
-
-import Header from './components/Header.jsx';
+import Home from './components/Home';
+import AddReview from './components/AddReview';
+import EditReview from './components/editReview';
+import Header from './components/Header';
 
 function App() {
   return (
@@ -20,5 +19,3 @@ function App() {
 }
 
 export default App;
-
-

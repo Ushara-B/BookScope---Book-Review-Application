@@ -1,71 +1,79 @@
 import React, { useState } from 'react';
 import axios from '../axios/axiosConfig';
-import { TextField, Button, Container, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Container, Typography, TextField, Button } from '@mui/material';
 
 const AddReview = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const [reviewData, setReviewData] = useState({
     bookTitle: '',
     author: '',
     rating: '',
-    reviewText: '',
+    reviewText: ''
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setReviewData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
-      await axios.post('/reviews', formData);
-      alert('Review added successfully!');
-    } catch (err) {
-      console.error('Error adding review:', err);
+      await axios.post('/reviews', reviewData);
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to add review:', error);
     }
   };
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Add a New Review
-      </Typography>
+    <Container maxWidth="sm">
+      <Typography variant="h4" sx={{ mt: 4, mb: 2, color: '#db0043' }}>Add a New Review</Typography>
       <form onSubmit={handleSubmit}>
         <TextField
+          fullWidth
           label="Book Title"
+          variant="outlined"
           name="bookTitle"
-          variant="outlined"
-          fullWidth
-          margin="normal"
+          value={reviewData.bookTitle}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
         <TextField
+          fullWidth
           label="Author"
+          variant="outlined"
           name="author"
-          variant="outlined"
-          fullWidth
-          margin="normal"
+          value={reviewData.author}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
         <TextField
+          fullWidth
           label="Rating (1-5)"
-          name="rating"
-          variant="outlined"
           type="number"
-          fullWidth
-          margin="normal"
+          variant="outlined"
+          name="rating"
+          value={reviewData.rating}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
         <TextField
+          fullWidth
           label="Review"
-          name="reviewText"
           variant="outlined"
+          name="reviewText"
           multiline
           rows={4}
-          fullWidth
-          margin="normal"
+          value={reviewData.reviewText}
           onChange={handleChange}
+          sx={{ mb: 2 }}
         />
-        <Button type="submit" variant="contained" color="primary">
+        <Button type="submit" variant="contained" sx={{ backgroundColor: '#ff8000', "&:hover": { backgroundColor: '#ff5500' } }}>
           Add Review
         </Button>
       </form>
