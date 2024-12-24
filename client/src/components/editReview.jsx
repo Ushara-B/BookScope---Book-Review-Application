@@ -1,91 +1,87 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../axios/axiosConfig';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, TextField, Button, Box } from '@mui/material';
+import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 const EditReview = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Review ID
   const navigate = useNavigate();
   const [review, setReview] = useState({
     bookTitle: '',
-    author: '',
-    rating: '',
-    reviewText: ''
+    reviewText: '',
+    rating: 0,
   });
 
   useEffect(() => {
-    const fetchReview = async () => {
-      try {
-        const { data } = await axios.get(`/reviews/${id}`);
-        setReview(data);
-      } catch (err) {
-        console.error('Error fetching review:', err);
-      }
-    };
     fetchReview();
-  }, [id]);
+  }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setReview(prev => ({ ...prev, [name]: value }));
+  const fetchReview = async () => {
+    try {
+      const response = await axios.get(`/api/reviews/${id}`);
+      setReview(response.data);
+    } catch (err) {
+      console.error('Error fetching review:', err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/reviews/${id}`, review);
-      navigate('/');
+      await axios.put(`/api/reviews/${id}`, review);
+      navigate('/'); // Redirect to the homepage
     } catch (err) {
       console.error('Error updating review:', err);
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setReview({ ...review, [name]: value });
+  };
+
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" sx={{ mt: 4, mb: 2, color: '#db0043' }}>Edit Review</Typography>
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        Edit Review
+      </Typography>
       <form onSubmit={handleSubmit}>
         <TextField
-          fullWidth
           label="Book Title"
-          variant="outlined"
           name="bookTitle"
+          variant="outlined"
+          fullWidth
+          margin="normal"
           value={review.bookTitle}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
+          disabled
         />
         <TextField
-          fullWidth
-          label="Author"
-          variant="outlined"
-          name="author"
-          value={review.author}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Rating (1-5)"
-          type="number"
-          variant="outlined"
-          name="rating"
-          value={review.rating}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Review"
-          variant="outlined"
+          label="Review Text"
           name="reviewText"
-          multiline
-          rows={4}
+          variant="outlined"
+          fullWidth
+          margin="normal"
           value={review.reviewText}
           onChange={handleChange}
-          sx={{ mb: 2 }}
+          required
         />
-        <Button type="submit" variant="contained" sx={{ backgroundColor: '#ff8000', "&:hover": { backgroundColor: '#ff5500' } }}>
-          Update Review
-        </Button>
+        <TextField
+          label="Rating (1-5)"
+          name="rating"
+          type="number"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={review.rating}
+          onChange={handleChange}
+          inputProps={{ min: 1, max: 5 }}
+          required
+        />
+        <Box mt={2}>
+          <Button variant="contained" color="primary" type="submit">
+            Save Changes
+          </Button>
+        </Box>
       </form>
     </Container>
   );

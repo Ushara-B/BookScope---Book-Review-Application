@@ -1,93 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from '../axios/axiosConfig';
-import { Container, Typography, Card, CardContent, Grid, IconButton, Button, TextField, Select, MenuItem, Box } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Container, TextField, Button, Grid, Typography, Card, CardMedia, CardContent, Box } from '@mui/material';
 
 const Home = () => {
-  const [reviews, setReviews] = useState([]);
-  const [search, setSearch] = useState('');
-  const [sortOrder, setSortOrder] = useState('');
+  const [query, setQuery] = useState('');
+  const [books, setBooks] = useState([]);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [sortOrder]);
-
-  const fetchReviews = async () => {
+  const searchBooks = async () => {
     try {
-      const response = await axios.get(`/reviews?sort=${sortOrder}`);
-      setReviews(response.data);
-    } catch (err) {
-      console.error('Error fetching reviews:', err);
+      const response = await axios.get(`/api/books/search?query=${query}`);
+      const topResults = response.data.slice(0, 5); // Get the first 5 results
+      setBooks(topResults); // Update books state with the top 5 results
+    } catch (error) {
+      console.error('Error fetching books:', error);
     }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/reviews/${id}`);
-      setReviews(reviews.filter(review => review._id !== id)); // Optimistically update the UI
-    } catch (err) {
-      console.error('Error deleting review:', err);
-    }
-  };
-
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, index) => index < rating ? <StarIcon key={index} style={{ color: '#f4f400' }}/> : <StarBorderIcon key={index} style={{ color: '#f4f400' }}/>);
   };
 
   return (
     <Container sx={{ backgroundColor: '#f0e0d6', padding: '20px', minHeight: '100vh', borderRadius: '8px' }}>
       <Typography variant="h4" gutterBottom sx={{ color: '#db0043', mb: 4 }}>
-        Book Reviews
+        Search for Books
       </Typography>
       <TextField
-        label="Search by book title"
+        label="Search Google Books"
         variant="outlined"
         fullWidth
-        value={search}
-        onChange={(e) => setSearch(e.target.value.toLowerCase())}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
         sx={{ mb: 2 }}
       />
-      <Select
-        value={sortOrder}
-        onChange={(e) => setSortOrder(e.target.value)}
-        displayEmpty
-        fullWidth
-        variant="outlined"
-        sx={{ mb: 4, backgroundColor: '#f4f400', color: 'black', borderRadius: '20px' }}
+      <Button
+        variant="contained"
+        onClick={searchBooks}
+        sx={{ backgroundColor: '#db0043', color: '#fff', mb: 4 }}
       >
-        <MenuItem value="">Default</MenuItem>
-        <MenuItem value="date">Sort by Date Updated</MenuItem>
-        <MenuItem value="title">Sort Alphabetically</MenuItem>
-      </Select>
+        Search
+      </Button>
       <Grid container spacing={2}>
-        {reviews.filter(review => review.bookTitle.toLowerCase().includes(search)).map((review) => (
-          <Grid item xs={12} sm={6} md={4} key={review._id}>
-            <Card sx={{ position: 'relative', minHeight: 250, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: '8px', backgroundColor: '#ff8000', padding: '10px' }}>
-              <IconButton
-                onClick={() => handleDelete(review._id)}
-                sx={{ position: 'absolute', top: 8, right: 8, color: '#db0043' }}
-                aria-label="delete review"
-              >
-                <DeleteIcon />
-              </IconButton>
+        {books.map((book) => (
+          <Grid item xs={12} sm={6} md={4} key={book.bookId}>
+            <Card sx={{ minHeight: 350, borderRadius: '8px' }}>
+              <CardMedia
+                component="img"
+                height="200"
+                image={book.thumbnail || 'https://via.placeholder.com/150'}
+                alt={book.title}
+              />
               <CardContent>
-                <Typography variant="h6">{review.bookTitle}</Typography>
-                <Box display="flex" alignItems="center" mb={1}>
-                  {renderStars(review.rating)}
-                </Box>
-                <Typography variant="body2">{review.reviewText}</Typography>
+                <Typography variant="h6">{book.title}</Typography>
+                <Typography variant="body2">
+                  {book.authors ? book.authors.join(', ') : 'No authors available'}
+                </Typography>
+                <Typography variant="body2">
+                  {book.description?.substring(0, 100) || 'No description available'}...
+                </Typography>
               </CardContent>
-              <Box textAlign="center" pb={2}>
-                <Button href={`/edit/${review._id}`} sx={{ backgroundColor: '#8f0046', color: 'white', '&:hover': { backgroundColor: '#7a0037' }, borderRadius: '8px', textTransform: 'none', padding: '6px 12px' }}>
-                  Edit
-                </Button>
-              </Box>
             </Card>
           </Grid>
         ))}
       </Grid>
+      {books.length === 0 && query && (
+        <Typography variant="body1" sx={{ mt: 4, textAlign: 'center', color: '#db0043' }}>
+          No results found. Please try a different search term.
+        </Typography>
+      )}
     </Container>
   );
 };

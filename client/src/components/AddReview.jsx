@@ -1,81 +1,100 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../axios/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography, TextField, Button } from '@mui/material';
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Select,
+  MenuItem,
+  Box,
+} from '@mui/material';
 
 const AddReview = () => {
   const navigate = useNavigate();
-  const [reviewData, setReviewData] = useState({
-    bookTitle: '',
-    author: '',
-    rating: '',
-    reviewText: ''
-  });
+  const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState('');
+  const [reviewText, setReviewText] = useState('');
+  const [rating, setRating] = useState('');
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setReviewData(prevData => ({
-      ...prevData,
-      [name]: value
-    }));
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get('/api/books/search?query=programming'); // Replace 'programming' with your query
+      setBooks(response.data);
+    } catch (err) {
+      console.error('Error fetching books:', err);
+    }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await axios.post('/reviews', reviewData);
-      navigate('/');
-    } catch (error) {
-      console.error('Failed to add review:', error);
+      await axios.post('/api/reviews', {
+        bookId: selectedBook,
+        bookTitle: books.find((book) => book.bookId === selectedBook)?.title,
+        reviewText,
+        rating,
+      });
+      navigate('/'); // Redirect to the homepage
+    } catch (err) {
+      console.error('Error adding review:', err);
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" sx={{ mt: 4, mb: 2, color: '#db0043' }}>Add a New Review</Typography>
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        Add a New Review
+      </Typography>
       <form onSubmit={handleSubmit}>
-        <TextField
+        <Select
+          value={selectedBook}
+          onChange={(e) => setSelectedBook(e.target.value)}
+          displayEmpty
           fullWidth
-          label="Book Title"
           variant="outlined"
-          name="bookTitle"
-          value={reviewData.bookTitle}
-          onChange={handleChange}
+          required
           sx={{ mb: 2 }}
+        >
+          <MenuItem value="" disabled>
+            Select a Book
+          </MenuItem>
+          {books.map((book) => (
+            <MenuItem key={book.bookId} value={book.bookId}>
+              {book.title}
+            </MenuItem>
+          ))}
+        </Select>
+        <TextField
+          label="Review Text"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={reviewText}
+          onChange={(e) => setReviewText(e.target.value)}
+          required
         />
         <TextField
-          fullWidth
-          label="Author"
-          variant="outlined"
-          name="author"
-          value={reviewData.author}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
           label="Rating (1-5)"
           type="number"
           variant="outlined"
-          name="rating"
-          value={reviewData.rating}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
           fullWidth
-          label="Review"
-          variant="outlined"
-          name="reviewText"
-          multiline
-          rows={4}
-          value={reviewData.reviewText}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
+          margin="normal"
+          value={rating}
+          onChange={(e) => setRating(e.target.value)}
+          inputProps={{ min: 1, max: 5 }}
+          required
         />
-        <Button type="submit" variant="contained" sx={{ backgroundColor: '#ff8000', "&:hover": { backgroundColor: '#ff5500' } }}>
-          Add Review
-        </Button>
+        <Box mt={2}>
+          <Button variant="contained" color="primary" type="submit">
+            Add Review
+          </Button>
+        </Box>
       </form>
     </Container>
   );

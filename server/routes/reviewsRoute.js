@@ -1,16 +1,30 @@
 const express = require('express');
+const Review = require('../models/reviewsModel');
 const router = express.Router();
-const {
-  getAllReviews,
-  createReview,
-  updateReview,
-  deleteReview,
-} = require('../controllers/reviewsController');
 
-// Define routes
-router.get('/', getAllReviews);       // Fetch all reviews
-router.post('/', createReview);      // Create a new review
-router.put('/:id', updateReview);    // Update a review by ID
-router.delete('/:id', deleteReview); // Delete a review by ID
+// Get all reviews for a book
+router.get('/:bookId', async (req, res) => {
+  const { bookId } = req.params;
+  try {
+    const reviews = await Review.find({ bookId });
+    res.json(reviews);
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+    res.status(500).json({ message: 'Error fetching reviews' });
+  }
+});
+
+// Add a review
+router.post('/', async (req, res) => {
+  const { bookId, bookTitle, reviewText, rating } = req.body;
+  try {
+    const newReview = new Review({ bookId, bookTitle, reviewText, rating });
+    await newReview.save();
+    res.status(201).json(newReview);
+  } catch (err) {
+    console.error('Error creating review:', err);
+    res.status(500).json({ message: 'Error creating review' });
+  }
+});
 
 module.exports = router;

@@ -1,40 +1,24 @@
-const express = require('express');
+require('dotenv').config(); 
 const cors = require('cors');
+const express = require('express');
 const mongoose = require('mongoose');
-require('dotenv').config();
-
+const booksRoute = require('./routes/books');
 const reviewsRoute = require('./routes/reviewsRoute');
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Root Route
-app.get('/', (req, res) => {
-  res.send('Welcome to the Book Review API!');
-});
-
-// Load environment variables
-const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
+console.log('Mongo URI:', MONGO_URI);
 
-// Connect to MongoDB
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// Mount reviews route
-app.use('/reviews', reviewsRoute);
+app.use(express.json());
+app.use(cors());
 
-// Handle undefined routes
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+app.use('/api/books', booksRoute);
+app.use('/api/reviews', reviewsRoute);
 
-// Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
