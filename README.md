@@ -20,9 +20,9 @@ BookScope is an application designed to facilitate the review of various books. 
 ### Installation Steps
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/BookScope---Book-Review-Application.git
+   git clone https://github.com/Ushara-B/BookScope---Book-Review-Application.git
    cd BookScope---Book-Review-Application
-   git clone https://github.com/your-username/BookScope---Book-Review-Application.git
+   git clone https://github.com/Ushara-B/BookScope---Book-Review-Application.git
    cd BookScope---Book-Review-Application
 
 2. Install dependencies
